@@ -8,7 +8,7 @@ as initialization.
 
 ## How to use
 
-To get a binary vector with a threshold at a p-value of $10^{-5}$
+To get a binary vector with a threshold at a p-value of $`10^{-5}`$
 ```
 vectB = Peaks_Caller(vect)
 ```
