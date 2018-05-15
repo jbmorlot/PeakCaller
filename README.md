@@ -18,5 +18,5 @@ To get the p-value vector
 vectB = Peaks_Caller(vect,getPval=True)
 ```
 
-Note:By default, the windows are compute in parallel, using all the cores of the machine.
-To change it, change Ncore parameter.
+Note: By default, the distribution parameters inside windows are computed in parallel,
+using all the cores of the machine (`Ncore=-1`).
