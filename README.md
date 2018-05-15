@@ -1,14 +1,18 @@
-# Peak_Caller
-Peak caller based on the Zero Inflated Negative Binomial (ZINB) distribution (Cusco &al 2016 Bioinformatics).
+# ZINB Peak Caller
+Peak caller based on the Zero Inflated Negative Binomial (ZINB) distribution [Cusco &al 2016 Bioinformatics](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btw336).
+
 The algorithm works in two phases:
-First fit the distribution parameters on the entire vector by using multiple random initialization.
-Then fit the distribution parameters on widows of size WS using the optimization on the entire vector
+ 1. Fit the distribution parameters on the entire vector by using multiple random initialization.
+ 2. Fit the distribution parameters on widows of size WS using the optimization on the entire vector
 as initialization.
-##How to use
+
+## How to use
+
 To get a binary vector with a threshold at a p-value of $10^{-5}$
 ```
 vectB = Peaks_Caller(vect)
 ```
+
 To get the p-value vector
 ```
 vectB = Peaks_Caller(vect,getPval=True)
