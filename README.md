@@ -8,7 +8,7 @@ as initialization.
 
 ## How to use
 
-To get a binary vector with a threshold at a p-value of ![eq1]
+To get a binary vector with a threshold at a p-value of <img src="https://latex.codecogs.com/gif.latex?10^{-5}" title="10^{-5}" /></a>
 ```
 vectB = Peaks_Caller(vect)
 ```
@@ -20,5 +20,3 @@ vectB = Peaks_Caller(vect,getPval=True)
 
 Note:By default, the windows are compute in parallel, using all the cores of the machine.
 To change it, change Ncore parameter.
-
-[eq1]: <a href="https://www.codecogs.com/eqnedit.php?latex=10^{-5}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?10^{-5}" title="10^{-5}" /></a>
