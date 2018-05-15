@@ -4,7 +4,6 @@ from scipy.special import gamma
 
 import warnings
 
-print 'hellozzz'
 
 """
 Function list
