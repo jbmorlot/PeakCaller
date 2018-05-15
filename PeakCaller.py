@@ -49,7 +49,7 @@ def logfactorial(X):
     return Y
 
 
-def Peaks_Caller(vect,WS=50000,NR=10,Ncore=1,verbose=False,Pval=5,getPval=False):
+def Peaks_Caller(vect,WS=50000,NR=10,Ncore=-1,verbose=False,Pval=5,getPval=False):
     '''
         Peak caller which transform a raw NGS experiment vector in a binary Vector
         indentifying the position of the peaks.
@@ -66,7 +66,8 @@ def Peaks_Caller(vect,WS=50000,NR=10,Ncore=1,verbose=False,Pval=5,getPval=False)
         Pval: Threshold above which the signal is discretized (default=5)
         Ncore: Number of core used to compute the different windows
         getPval: The
-        out:
+
+        Output:
             vector of pval or binary of the same size than the original vector
     '''
 
@@ -115,15 +116,14 @@ def Peaks_Caller(vect,WS=50000,NR=10,Ncore=1,verbose=False,Pval=5,getPval=False)
 
     if verbose: print 'Optimizing locally the ZINB distribution parameters'
     N = vect.shape[0]
-    W = np.append(np.arange(0,N,WS),N-WS,N).astype(np.int32)
+    W = np.append(np.arange(0,N,WS),N).astype(np.int32)
     NW = len(W)
     X = np.copy(vect)
-
 
     if Ncore==-1: Ncore = multiprocessing.cpu_count()
     pool = multiprocessing.Pool(Ncore)
     args = [[X[W[i]:W[i+1]],M,param_opt,i,len(W),verbose] for i in range(NW-1)]
-    Pval_vect_c = pool.map(wrapper_Peaks_Caller_Pval_MP,args)
+    Pval_vect_c = pool.map(wrapper_Peaks_Caller,args)
     pool.close()
     pool.join()
 
@@ -142,32 +142,31 @@ def Peaks_Caller(vect,WS=50000,NR=10,Ncore=1,verbose=False,Pval=5,getPval=False)
         return vectB
 
 
-def wrapper_Peaks_Caller_Pval_MP(args):
-
+def wrapper_Peaks_Caller(args):
     X,M,param_opt,i,lW,verbose = args
 
+    MX = int(X.max()+1)
     if verbose: print 'Part: ' + str(i+1) + ' / ' + str(lW-1)
 
-    X = X[X>0]
-
     #If there is not enougth non zeros sites, just set all the points to zeros
-    if len(X)<=10:
-        return np.zeros(int(X.max()+1))
+    idx = np.where(X>0)[0]
+    if len(idx)<=10:
+        return np.zeros(MX)
 
-    else:
-        #Ytrue
-        bins = np.arange(M+1)
-        Ytrue, bin_edges = np.histogram(X, bins=bins)
-        bins = bins[:M]
-        Ytrue = Ytrue.astype(np.float64)[:M]
-        Ytrue/=np.sum(Ytrue)
+    X = X[idx]
 
-        #Fit by changing the global parameters
-        param_opt_i = minimize(Loss_ZIMB,x0=param_opt,args=(M,Ytrue[:M]),method="Nelder-Mead").x
-        Pval_vect = -np.log10(1-np.cumsum(ZIMB(M,param_opt_i)))
-        #If the value is too close to 0, NaN or Inf arise--> Set them to high pvalue
-        Pval_vect[np.isnan(Pval_vect)]=20
-        Pval_vect[np.isinf(Pval_vect)]=20
+    #Ytrue
+    bins = np.arange(M+1)
+    Ytrue, bin_edges = np.histogram(X, bins=bins)
+    bins = bins[:M]
+    Ytrue = Ytrue.astype(np.float64)[:M]
+    Ytrue/=np.sum(Ytrue)
 
+    #Fit local parameters
+    param_opt_i = minimize(Loss_ZIMB,x0=param_opt,args=(M,Ytrue[:M]),method="Nelder-Mead").x
+    Pval_vect = -np.log10(1-np.cumsum(ZIMB(MX,param_opt_i)))
+    #If the value is too close to 0, NaN or Inf arise--> Set them to high pvalue
+    Pval_vect[np.isnan(Pval_vect)] = 20
+    Pval_vect[np.isinf(Pval_vect)] = 20
 
     return Pval_vect
